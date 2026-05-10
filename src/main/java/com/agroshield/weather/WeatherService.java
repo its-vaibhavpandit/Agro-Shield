@@ -6,6 +6,10 @@ import java.net.URL;
 import java.net.URI;
 
 public class WeatherService {
+    // OpenWeatherMap API Key
+    private static final String API_KEY = "d9baba01364472d02fc8ce407efff4ff";
+    private static final String API_BASE_URL = "https://api.openweathermap.org/data/2.5/weather";
+    
     private double temp = 0.0;
     private double humidity = 0.0;
     private String forecast = "Loading...";
@@ -37,8 +41,9 @@ public class WeatherService {
                 }
             }
             
-            // Fetch Weather
-            URL urlW = new URI("https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current=temperature_2m,relative_humidity_2m,weather_code").toURL();
+            // Fetch Weather from OpenWeatherMap API
+            String weatherUrl = API_BASE_URL + "?lat=" + lat + "&lon=" + lon + "&appid=" + API_KEY + "&units=metric";
+            URL urlW = new URI(weatherUrl).toURL();
             HttpURLConnection connW = (HttpURLConnection) urlW.openConnection();
             connW.setRequestMethod("GET");
             connW.setConnectTimeout(5000);
@@ -53,12 +58,20 @@ public class WeatherService {
                 
                 String response = content.toString();
                 
-                // Parse JSON fields manually
-                temp = extractDouble(response, "\"temperature_2m\":");
-                humidity = extractDouble(response, "\"relative_humidity_2m\":");
-                int code = (int) extractDouble(response, "\"weather_code\":");
+                // Parse JSON response from OpenWeatherMap
+                // Temperature is in "main":{"temp": value
+                temp = extractDouble(response, "\"temp\":");
                 
-                forecast = mapWeatherCode(code);
+                // Humidity is in "main":{"temp":..., "humidity": value
+                humidity = extractDouble(response, "\"humidity\":");
+                
+                // Weather description is in "weather":[{"main":"description"
+                String description = extractString(response, "\"weather\":[{\"main\":\"", "\"");
+                if (description != null && !description.isEmpty()) {
+                    forecast = description;
+                } else {
+                    forecast = "Unknown";
+                }
             }
             
         } catch (Exception e) {
@@ -82,14 +95,13 @@ public class WeatherService {
         }
     }
     
-    private String mapWeatherCode(int code) {
-        if (code == 0) return "Clear Sky";
-        if (code == 1 || code == 2 || code == 3) return "Cloudy";
-        if (code >= 45 && code <= 48) return "Foggy";
-        if (code >= 51 && code <= 67) return "Rainy";
-        if (code >= 71 && code <= 77) return "Snowy";
-        if (code >= 95) return "Thunderstorm";
-        return "Variable";
+    private String extractString(String json, String startKey, String endKey) {
+        int idx = json.indexOf(startKey);
+        if (idx == -1) return null;
+        idx += startKey.length();
+        int endIdx = json.indexOf(endKey, idx);
+        if (endIdx == -1) return null;
+        return json.substring(idx, endIdx).trim();
     }
 
     public double getTemp() { return temp; }
