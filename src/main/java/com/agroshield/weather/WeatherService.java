@@ -16,6 +16,22 @@ public class WeatherService {
     private double lat = 20.5937; // Default India lat
     private double lon = 78.9629; // Default India lon
     private boolean locationFetched = false;
+    private String currentLocation = "Default (India)";
+    
+    // Allow users to set custom location
+    public void setLocation(double latitude, double longitude) {
+        this.lat = latitude;
+        this.lon = longitude;
+        this.locationFetched = true;
+    }
+    
+    public void setLocationName(String name) {
+        this.currentLocation = name;
+    }
+    
+    public String getCurrentLocation() {
+        return currentLocation;
+    }
 
     public void updateWeather() {
         try {
