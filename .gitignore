@@ -1,0 +1,36 @@
+# Compiled Java files
+*.class
+bin/
+target/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+*.log
+
+# Build files
+*.jar
+*.war
+*.ear
+
+# IDE specific
+.classpath
+.project
+.settings/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Local environment files
+*.local
+*.env
